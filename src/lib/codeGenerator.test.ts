@@ -25,6 +25,7 @@ function makeTrack(overrides: Partial<Track> = {}): Track {
     muted: false,
     volume: 1,
     color: '#3b82f6',
+    type: 'drum',
     ...overrides,
   }
 }

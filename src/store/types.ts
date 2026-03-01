@@ -1,5 +1,6 @@
 export interface Step {
   active: boolean;
+  notes?: string[];
 }
 
 export interface Effect {
@@ -21,4 +22,6 @@ export interface Track {
   muted: boolean;
   volume: number;
   color: string;
+  type: 'drum' | 'synth';
+  synth?: string;
 }
