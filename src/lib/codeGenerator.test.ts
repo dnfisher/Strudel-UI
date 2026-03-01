@@ -294,3 +294,44 @@ describe('generatePlayableCode — synth tracks', () => {
     expect(generatePlayableCode([t], 120)).toContain('.s("square")')
   })
 })
+
+describe('patterned effects', () => {
+  it('uses pattern string when patternMode is true', () => {
+    const t = makeTrack({
+      effects: [makeEffect({
+        param: 'lpf',
+        value: 800,
+        enabled: true,
+        patternMode: true,
+        pattern: '200 800 200 1600',
+      })],
+    })
+    const code = generateDisplayCode([t], 120)
+    expect(code).toContain('.lpf("200 800 200 1600")')
+    expect(code).not.toContain('.lpf(800)')
+  })
+
+  it('uses numeric value when patternMode is false', () => {
+    const t = makeTrack({
+      effects: [makeEffect({ param: 'lpf', value: 800, enabled: true, patternMode: false })],
+    })
+    expect(generateDisplayCode([t], 120)).toContain('.lpf(800)')
+  })
+
+  it('uses numeric value when patternMode is true but pattern is empty', () => {
+    const t = makeTrack({
+      effects: [makeEffect({ param: 'room', value: 0.5, enabled: true, patternMode: true, pattern: '' })],
+    })
+    expect(generateDisplayCode([t], 120)).toContain('.room(0.5)')
+  })
+
+  it('works for synth tracks with patterned effects', () => {
+    const t = withSynthNotes(
+      makeSynthTrack({
+        effects: [makeEffect({ param: 'lpf', value: 800, enabled: true, patternMode: true, pattern: '200 1600' })],
+      }),
+      { 0: ['c3'] }
+    )
+    expect(generateDisplayCode([t], 120)).toContain('.lpf("200 1600")')
+  })
+})

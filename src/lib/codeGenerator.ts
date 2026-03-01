@@ -1,4 +1,14 @@
-import type { Track } from '../store/types';
+import type { Track, Effect } from '../store/types';
+
+function effectsCode(effects: Effect[]): string {
+  return effects
+    .filter(e => e.enabled)
+    .map(e => {
+      const val = e.patternMode && e.pattern ? `"${e.pattern}"` : e.value;
+      return `.${e.param}(${val})`;
+    })
+    .join('');
+}
 
 function generateSynthTrackCode(track: Track): string {
   const steps = track.steps.map(step => {
@@ -9,38 +19,18 @@ function generateSynthTrackCode(track: Track): string {
   });
 
   let code = `note("${steps.join(' ')}").s("${track.synth ?? 'supersaw'}")`;
-
-  if (track.volume !== 1) {
-    code += `.gain(${track.volume.toFixed(2)})`;
-  }
-
-  for (const effect of track.effects) {
-    if (effect.enabled) {
-      code += `.${effect.param}(${effect.value})`;
-    }
-  }
-
+  if (track.volume !== 1) code += `.gain(${track.volume.toFixed(2)})`;
+  code += effectsCode(track.effects);
   return code;
 }
 
 function generateTrackCode(track: Track): string {
-  if (track.type === 'synth') {
-    return generateSynthTrackCode(track);
-  }
+  if (track.type === 'synth') return generateSynthTrackCode(track);
 
   const steps = track.steps.map(step => step.active ? track.sound : '~');
   let code = `s("${steps.join(' ')}")`;
-
-  if (track.volume !== 1) {
-    code += `.gain(${track.volume.toFixed(2)})`;
-  }
-
-  for (const effect of track.effects) {
-    if (effect.enabled) {
-      code += `.${effect.param}(${effect.value})`;
-    }
-  }
-
+  if (track.volume !== 1) code += `.gain(${track.volume.toFixed(2)})`;
+  code += effectsCode(track.effects);
   return code;
 }
 
