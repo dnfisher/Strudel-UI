@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --color-surface: #0a0a0f;
+  --color-surface-raised: #12121a;
+  --color-surface-hover: #1a1a25;
+  --color-border: #ffffff10;
+}
+
+body {
+  margin: 0;
+  background: var(--color-surface);
+  color: #e2e8f0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #ffffff20;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  cursor: pointer;
+  border: none;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #ffffff;
+}
+
+/* Number input styling */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ffffff15;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ffffff25;
+}
+
+/* Play button pulse animation */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px #22c55e40; }
+  50% { box-shadow: 0 0 20px #22c55e60; }
+}
+
+.playing-pulse {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
