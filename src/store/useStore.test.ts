@@ -340,3 +340,72 @@ describe('toggleSynthNote', () => {
     expect(useStore.getState().tracks[0].steps[2].notes).toContain('c3')
   })
 })
+
+describe('toggleCollapse', () => {
+  it('sets collapsed to true when currently false', () => {
+    useStore.getState().addTrack('bd')
+    const id = useStore.getState().tracks[0].id
+    useStore.getState().toggleCollapse(id)
+    expect(useStore.getState().tracks[0].collapsed).toBe(true)
+  })
+
+  it('sets collapsed to false when currently true', () => {
+    useStore.getState().addTrack('bd')
+    const id = useStore.getState().tracks[0].id
+    useStore.getState().toggleCollapse(id)
+    useStore.getState().toggleCollapse(id)
+    expect(useStore.getState().tracks[0].collapsed).toBe(false)
+  })
+})
+
+describe('setSynthOctave', () => {
+  it('sets the octave on a synth track', () => {
+    useStore.getState().addSynthTrack('supersaw')
+    const id = useStore.getState().tracks[0].id
+    useStore.getState().setSynthOctave(id, 5)
+    expect(useStore.getState().tracks[0].octave).toBe(5)
+  })
+
+  it('clamps to minimum of 1', () => {
+    useStore.getState().addSynthTrack('supersaw')
+    const id = useStore.getState().tracks[0].id
+    useStore.getState().setSynthOctave(id, 0)
+    expect(useStore.getState().tracks[0].octave).toBe(1)
+  })
+
+  it('clamps to maximum of 7', () => {
+    useStore.getState().addSynthTrack('supersaw')
+    const id = useStore.getState().tracks[0].id
+    useStore.getState().setSynthOctave(id, 9)
+    expect(useStore.getState().tracks[0].octave).toBe(7)
+  })
+})
+
+describe('setEffectPattern', () => {
+  it('sets the pattern string on the matching effect', () => {
+    useStore.getState().addTrack('bd')
+    const id = useStore.getState().tracks[0].id
+    useStore.getState().setEffectPattern(id, 'lpf', '200 800 200 1600')
+    const effect = useStore.getState().tracks[0].effects.find(e => e.param === 'lpf')!
+    expect(effect.pattern).toBe('200 800 200 1600')
+  })
+})
+
+describe('toggleEffectPatternMode', () => {
+  it('sets patternMode to true when currently falsy', () => {
+    useStore.getState().addTrack('bd')
+    const id = useStore.getState().tracks[0].id
+    useStore.getState().toggleEffectPatternMode(id, 'lpf')
+    const effect = useStore.getState().tracks[0].effects.find(e => e.param === 'lpf')!
+    expect(effect.patternMode).toBe(true)
+  })
+
+  it('toggles patternMode off when currently true', () => {
+    useStore.getState().addTrack('bd')
+    const id = useStore.getState().tracks[0].id
+    useStore.getState().toggleEffectPatternMode(id, 'lpf')
+    useStore.getState().toggleEffectPatternMode(id, 'lpf')
+    const effect = useStore.getState().tracks[0].effects.find(e => e.param === 'lpf')!
+    expect(effect.patternMode).toBe(false)
+  })
+})

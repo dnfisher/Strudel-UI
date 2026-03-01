@@ -17,6 +17,10 @@ interface AppState {
   setTrackVolume: (trackId: string, volume: number) => void;
   setEffectValue: (trackId: string, effectParam: string, value: number) => void;
   toggleEffect: (trackId: string, effectParam: string) => void;
+  toggleCollapse: (trackId: string) => void;
+  setSynthOctave: (trackId: string, octave: number) => void;
+  setEffectPattern: (trackId: string, effectParam: string, pattern: string) => void;
+  toggleEffectPatternMode: (trackId: string, effectParam: string) => void;
   selectTrack: (id: string | null) => void;
   setPlaying: (playing: boolean) => void;
   setBpm: (bpm: number) => void;
@@ -101,6 +105,34 @@ export const useStore = create<AppState>((set) => ({
             e.param === effectParam ? { ...e, enabled: !e.enabled } : e
           ),
         }
+        : t
+    ),
+  })),
+
+  toggleCollapse: (trackId) => set(state => ({
+    tracks: state.tracks.map(t =>
+      t.id === trackId ? { ...t, collapsed: !t.collapsed } : t
+    ),
+  })),
+
+  setSynthOctave: (trackId, octave) => set(state => ({
+    tracks: state.tracks.map(t =>
+      t.id === trackId ? { ...t, octave: Math.max(1, Math.min(7, octave)) } : t
+    ),
+  })),
+
+  setEffectPattern: (trackId, effectParam, pattern) => set(state => ({
+    tracks: state.tracks.map(t =>
+      t.id === trackId
+        ? { ...t, effects: t.effects.map(e => e.param === effectParam ? { ...e, pattern } : e) }
+        : t
+    ),
+  })),
+
+  toggleEffectPatternMode: (trackId, effectParam) => set(state => ({
+    tracks: state.tracks.map(t =>
+      t.id === trackId
+        ? { ...t, effects: t.effects.map(e => e.param === effectParam ? { ...e, patternMode: !e.patternMode } : e) }
         : t
     ),
   })),
