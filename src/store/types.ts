@@ -11,6 +11,8 @@ export interface Effect {
   max: number;
   step: number;
   enabled: boolean;
+  patternMode?: boolean;
+  pattern?: string;
 }
 
 export interface Track {
@@ -24,4 +26,6 @@ export interface Track {
   color: string;
   type: 'drum' | 'synth';
   synth?: string;
+  collapsed?: boolean;
+  octave?: number;
 }
