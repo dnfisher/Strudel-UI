@@ -22,9 +22,11 @@ function App() {
   const tracks = useStore(s => s.tracks);
   const selectedTrackId = useStore(s => s.selectedTrackId);
   const bpm = useStore(s => s.bpm);
-  const toggleEffect = useStore(s => s.toggleEffect);
-  const setEffectValue = useStore(s => s.setEffectValue);
-  const loadPreset = useStore(s => s.loadPreset);
+  const toggleEffect            = useStore(s => s.toggleEffect);
+  const setEffectValue          = useStore(s => s.setEffectValue);
+  const setEffectPattern        = useStore(s => s.setEffectPattern);
+  const toggleEffectPatternMode = useStore(s => s.toggleEffectPatternMode);
+  const loadPreset              = useStore(s => s.loadPreset);
 
   const selectedTrack = tracks.find(t => t.id === selectedTrackId);
   const displayCode = generateDisplayCode(tracks, bpm);
@@ -83,6 +85,8 @@ function App() {
                   trackId={selectedTrack.id}
                   onToggle={toggleEffect}
                   onChange={setEffectValue}
+                  onPatternToggle={toggleEffectPatternMode}
+                  onPatternChange={setEffectPattern}
                 />
               ))}
             </div>

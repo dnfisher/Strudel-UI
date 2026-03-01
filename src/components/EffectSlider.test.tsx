@@ -20,9 +20,13 @@ function makeEffect(overrides: Partial<Effect> = {}): Effect {
 function renderSlider(effectOverrides: Partial<Effect> = {}, handlers?: {
   onToggle?: ReturnType<typeof vi.fn>
   onChange?: ReturnType<typeof vi.fn>
+  onPatternToggle?: ReturnType<typeof vi.fn>
+  onPatternChange?: ReturnType<typeof vi.fn>
 }) {
   const onToggle = handlers?.onToggle ?? vi.fn()
   const onChange = handlers?.onChange ?? vi.fn()
+  const onPatternToggle = handlers?.onPatternToggle ?? vi.fn()
+  const onPatternChange = handlers?.onPatternChange ?? vi.fn()
   const effect = makeEffect(effectOverrides)
   render(
     <EffectSlider
@@ -30,9 +34,11 @@ function renderSlider(effectOverrides: Partial<Effect> = {}, handlers?: {
       trackId="track-1"
       onToggle={onToggle}
       onChange={onChange}
+      onPatternToggle={onPatternToggle}
+      onPatternChange={onPatternChange}
     />
   )
-  return { onToggle, onChange, effect }
+  return { onToggle, onChange, onPatternToggle, onPatternChange, effect }
 }
 
 describe('EffectSlider', () => {
@@ -53,18 +59,18 @@ describe('EffectSlider', () => {
   describe('toggle button', () => {
     it('shows ✓ when enabled', () => {
       renderSlider({ enabled: true })
-      expect(screen.getByRole('button')).toHaveTextContent('✓')
+      expect(screen.getByTitle('Disable')).toHaveTextContent('✓')
     })
 
     it('shows nothing when disabled', () => {
       renderSlider({ enabled: false })
-      expect(screen.getByRole('button')).toHaveTextContent('')
+      expect(screen.getByTitle('Enable')).toHaveTextContent('')
     })
 
     it('calls onToggle with trackId and param when clicked', async () => {
       const user = userEvent.setup()
       const { onToggle } = renderSlider({ param: 'room' })
-      await user.click(screen.getByRole('button'))
+      await user.click(screen.getByTitle('Enable'))
       expect(onToggle).toHaveBeenCalledWith('track-1', 'room')
     })
   })
@@ -110,5 +116,59 @@ describe('EffectSlider', () => {
       fireEvent.change(slider, { target: { value: '0.55' } })
       expect(onChange).toHaveBeenCalledWith('track-1', 'room', 0.55)
     })
+  })
+})
+
+describe('pattern mode', () => {
+  it('renders a ~ toggle button', () => {
+    renderSlider()
+    expect(screen.getByTitle('Pattern mode')).toBeInTheDocument()
+  })
+
+  it('calls onPatternToggle when ~ button is clicked', async () => {
+    const user = userEvent.setup()
+    const onPatternToggle = vi.fn()
+    const effect = makeEffect({ param: 'lpf' })
+    render(
+      <EffectSlider
+        effect={effect}
+        trackId="track-1"
+        onToggle={vi.fn()}
+        onChange={vi.fn()}
+        onPatternToggle={onPatternToggle}
+        onPatternChange={vi.fn()}
+      />
+    )
+    await user.click(screen.getByTitle('Pattern mode'))
+    expect(onPatternToggle).toHaveBeenCalledWith('track-1', 'lpf')
+  })
+
+  it('shows text input instead of slider when patternMode is true', () => {
+    renderSlider({ patternMode: true, pattern: '200 800' })
+    expect(screen.queryByRole('slider')).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toBeInTheDocument()
+  })
+
+  it('shows slider when patternMode is false', () => {
+    renderSlider({ patternMode: false })
+    expect(screen.getByRole('slider')).toBeInTheDocument()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+  })
+
+  it('calls onPatternChange when text input changes', () => {
+    const onPatternChange = vi.fn()
+    const effect = makeEffect({ patternMode: true, pattern: '200' })
+    render(
+      <EffectSlider
+        effect={effect}
+        trackId="track-1"
+        onToggle={vi.fn()}
+        onChange={vi.fn()}
+        onPatternToggle={vi.fn()}
+        onPatternChange={onPatternChange}
+      />
+    )
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: '200 800' } })
+    expect(onPatternChange).toHaveBeenCalledWith('track-1', effect.param, '200 800')
   })
 })
