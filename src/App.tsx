@@ -2,6 +2,7 @@ import { useStore } from './store/useStore';
 import { generateDisplayCode } from './lib/codeGenerator';
 import { Header } from './components/Header';
 import { TrackLane } from './components/TrackLane';
+import { SynthLane } from './components/SynthLane';
 import { AddTrackButton } from './components/AddTrackButton';
 import { EffectSlider } from './components/EffectSlider';
 import { CodePreview } from './components/CodePreview';
@@ -51,11 +52,9 @@ function App() {
         <div className="flex-1 px-5 py-4">
           <div className="flex flex-col gap-1">
             {tracks.map(track => (
-              <TrackLane
-                key={track.id}
-                track={track}
-                isSelected={track.id === selectedTrackId}
-              />
+              track.type === 'synth'
+                ? <SynthLane key={track.id} track={track} isSelected={track.id === selectedTrackId} />
+                : <TrackLane key={track.id} track={track} isSelected={track.id === selectedTrackId} />
             ))}
           </div>
 
