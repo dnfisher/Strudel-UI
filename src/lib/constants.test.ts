@@ -8,6 +8,9 @@ import {
   createPresetBasicBeat,
   createPresetHipHop,
   createPresetBreakbeat,
+  SYNTH_SOUNDS,
+  PIANO_ROLL_NOTES,
+  createSynthTrack,
 } from './constants'
 
 describe('DRUM_SOUNDS', () => {
@@ -256,5 +259,98 @@ describe('createPresetBreakbeat', () => {
   it('rimshot has volume 0.6', () => {
     const [,,, rimshot] = createPresetBreakbeat()
     expect(rimshot.volume).toBe(0.6)
+  })
+})
+
+describe('SYNTH_SOUNDS', () => {
+  it('contains 4 sounds', () => {
+    expect(SYNTH_SOUNDS).toHaveLength(4)
+  })
+
+  it('has supersaw, square, sine, triangle ids in order', () => {
+    expect(SYNTH_SOUNDS.map(s => s.id)).toEqual(['supersaw', 'square', 'sine', 'triangle'])
+  })
+
+  it('each sound has a truthy id and label', () => {
+    for (const s of SYNTH_SOUNDS) {
+      expect(s.id).toBeTruthy()
+      expect(s.label).toBeTruthy()
+    }
+  })
+})
+
+describe('PIANO_ROLL_NOTES', () => {
+  it('contains 36 notes (3 octaves × 12)', () => {
+    expect(PIANO_ROLL_NOTES).toHaveLength(36)
+  })
+
+  it('starts at b4 and ends at c2', () => {
+    expect(PIANO_ROLL_NOTES[0].note).toBe('b4')
+    expect(PIANO_ROLL_NOTES[35].note).toBe('c2')
+  })
+
+  it('marks sharp/flat notes as black keys', () => {
+    const blackNotes = PIANO_ROLL_NOTES.filter(n => n.isBlack).map(n => n.note)
+    expect(blackNotes).toContain('a#4')
+    expect(blackNotes).toContain('c#3')
+    expect(blackNotes).toContain('f#2')
+    expect(blackNotes).not.toContain('c4')
+    expect(blackNotes).not.toContain('e3')
+    expect(blackNotes).not.toContain('b2')
+  })
+
+  it('labels C notes with octave number', () => {
+    const cNotes = PIANO_ROLL_NOTES.filter(n => /^c\d$/.test(n.note))
+    for (const c of cNotes) {
+      expect(c.label).toMatch(/^C\d$/)
+    }
+  })
+
+  it('has exactly 15 black key notes (5 per octave × 3 octaves)', () => {
+    expect(PIANO_ROLL_NOTES.filter(n => n.isBlack)).toHaveLength(15)
+  })
+})
+
+describe('createSynthTrack', () => {
+  it('creates a track with type synth', () => {
+    expect(createSynthTrack('supersaw').type).toBe('synth')
+  })
+
+  it('assigns the synth field', () => {
+    expect(createSynthTrack('supersaw').synth).toBe('supersaw')
+    expect(createSynthTrack('sine').synth).toBe('sine')
+  })
+
+  it('creates 16 steps all with empty notes arrays and active false', () => {
+    const t = createSynthTrack('supersaw')
+    expect(t.steps).toHaveLength(16)
+    for (const step of t.steps) {
+      expect(step.active).toBe(false)
+      expect(step.notes).toEqual([])
+    }
+  })
+
+  it('uses the synth id as sound', () => {
+    expect(createSynthTrack('supersaw').sound).toBe('supersaw')
+  })
+
+  it('uppercases synth id as label', () => {
+    expect(createSynthTrack('supersaw').label).toBe('SUPERSAW')
+  })
+
+  it('has volume 0.8 by default', () => {
+    expect(createSynthTrack('supersaw').volume).toBe(0.8)
+  })
+
+  it('is not muted by default', () => {
+    expect(createSynthTrack('supersaw').muted).toBe(false)
+  })
+
+  it('creates 5 default effects', () => {
+    expect(createSynthTrack('supersaw').effects).toHaveLength(5)
+  })
+
+  it('generates a unique UUID id each call', () => {
+    expect(createSynthTrack('supersaw').id).not.toBe(createSynthTrack('supersaw').id)
   })
 })

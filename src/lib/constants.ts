@@ -55,6 +55,43 @@ export function createTrack(sound: string): Track {
     muted: false,
     volume: 0.8,
     color: getNextColor(),
+    type: 'drum',
+  };
+}
+
+export const SYNTH_SOUNDS = [
+  { id: 'supersaw', label: 'Supersaw' },
+  { id: 'square',   label: 'Square'   },
+  { id: 'sine',     label: 'Sine'     },
+  { id: 'triangle', label: 'Triangle' },
+] as const;
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+const BLACK_KEY_NAMES = new Set(['C#', 'D#', 'F#', 'G#', 'A#']);
+
+export const PIANO_ROLL_NOTES: Array<{ note: string; label: string; isBlack: boolean }> = [];
+for (let octave = 4; octave >= 2; octave--) {
+  for (let i = 11; i >= 0; i--) {
+    const name = NOTE_NAMES[i];
+    const isBlack = BLACK_KEY_NAMES.has(name);
+    const noteStr = name.toLowerCase().replace('#', '#') + octave;
+    const label = (name === 'C') ? `C${octave}` : name;
+    PIANO_ROLL_NOTES.push({ note: noteStr, label, isBlack });
+  }
+}
+
+export function createSynthTrack(synth: string): Track {
+  return {
+    id: crypto.randomUUID(),
+    sound: synth,
+    label: synth.toUpperCase(),
+    steps: Array.from({ length: 16 }, () => ({ active: false, notes: [] })),
+    effects: createDefaultEffects(),
+    muted: false,
+    volume: 0.8,
+    color: getNextColor(),
+    type: 'synth',
+    synth,
   };
 }
 
