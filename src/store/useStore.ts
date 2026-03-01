@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Track } from './types';
-import { createTrack, createPresetBasicBeat } from '../lib/constants';
+import { createTrack, createSynthTrack, createPresetBasicBeat } from '../lib/constants';
 
 interface AppState {
   tracks: Track[];
@@ -9,6 +9,8 @@ interface AppState {
   bpm: number;
 
   addTrack: (sound: string) => void;
+  addSynthTrack: (synth: string) => void;
+  toggleSynthNote: (trackId: string, stepIndex: number, note: string) => void;
   removeTrack: (id: string) => void;
   toggleStep: (trackId: string, stepIndex: number) => void;
   toggleMute: (trackId: string) => void;
@@ -29,6 +31,27 @@ export const useStore = create<AppState>((set) => ({
 
   addTrack: (sound) => set(state => ({
     tracks: [...state.tracks, createTrack(sound)],
+  })),
+
+  addSynthTrack: (synth) => set(state => ({
+    tracks: [...state.tracks, createSynthTrack(synth)],
+  })),
+
+  toggleSynthNote: (trackId, stepIndex, note) => set(state => ({
+    tracks: state.tracks.map(t => {
+      if (t.id !== trackId) return t;
+      return {
+        ...t,
+        steps: t.steps.map((s, i) => {
+          if (i !== stepIndex) return s;
+          const notes = s.notes ?? [];
+          const updated = notes.includes(note)
+            ? notes.filter(n => n !== note)
+            : [...notes, note];
+          return { ...s, notes: updated, active: updated.length > 0 };
+        }),
+      };
+    }),
   })),
 
   removeTrack: (id) => set(state => ({
