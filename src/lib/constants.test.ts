@@ -11,6 +11,7 @@ import {
   SYNTH_SOUNDS,
   PIANO_ROLL_NOTES,
   createSynthTrack,
+  SAMPLE_PACK_SOUNDS,
 } from './constants'
 
 describe('DRUM_SOUNDS', () => {
@@ -44,8 +45,8 @@ describe('TRACK_COLORS', () => {
 })
 
 describe('createDefaultEffects', () => {
-  it('returns 5 effects', () => {
-    expect(createDefaultEffects()).toHaveLength(5)
+  it('returns 14 effects', () => {
+    expect(createDefaultEffects()).toHaveLength(14)
   })
 
   it('all effects are disabled by default', () => {
@@ -54,9 +55,9 @@ describe('createDefaultEffects', () => {
     }
   })
 
-  it('includes lpf, room, delay, distort, pan in order', () => {
+  it('starts with lpf, room, delay, distort, pan', () => {
     const params = createDefaultEffects().map(e => e.param)
-    expect(params).toEqual(['lpf', 'room', 'delay', 'distort', 'pan'])
+    expect(params.slice(0, 5)).toEqual(['lpf', 'room', 'delay', 'distort', 'pan'])
   })
 
   it('each call returns an independent array', () => {
@@ -130,8 +131,8 @@ describe('createTrack', () => {
     expect(t.steps.every(s => !s.active)).toBe(true)
   })
 
-  it('creates 5 default effects', () => {
-    expect(createTrack('hh').effects).toHaveLength(5)
+  it('creates 14 default effects', () => {
+    expect(createTrack('hh').effects).toHaveLength(14)
   })
 
   it('is not muted by default', () => {
@@ -279,14 +280,34 @@ describe('SYNTH_SOUNDS', () => {
   })
 })
 
-describe('PIANO_ROLL_NOTES', () => {
-  it('contains 36 notes (3 octaves × 12)', () => {
-    expect(PIANO_ROLL_NOTES).toHaveLength(36)
+describe('SAMPLE_PACK_SOUNDS', () => {
+  it('exists and has at least one entry', () => {
+    expect(SAMPLE_PACK_SOUNDS.length).toBeGreaterThan(0)
   })
 
-  it('starts at b4 and ends at c2', () => {
-    expect(PIANO_ROLL_NOTES[0].note).toBe('b4')
-    expect(PIANO_ROLL_NOTES[35].note).toBe('c2')
+  it('each entry has id and label', () => {
+    for (const s of SAMPLE_PACK_SOUNDS) {
+      expect(s.id).toBeTruthy()
+      expect(s.label).toBeTruthy()
+    }
+  })
+
+  it('has no overlap with DRUM_SOUNDS ids', () => {
+    const drumIds = new Set(DRUM_SOUNDS.map(s => s.id))
+    for (const s of SAMPLE_PACK_SOUNDS) {
+      expect(drumIds.has(s.id)).toBe(false)
+    }
+  })
+})
+
+describe('PIANO_ROLL_NOTES', () => {
+  it('contains 84 notes (7 octaves × 12)', () => {
+    expect(PIANO_ROLL_NOTES).toHaveLength(84)
+  })
+
+  it('starts at b7 and ends at c1', () => {
+    expect(PIANO_ROLL_NOTES[0].note).toBe('b7')
+    expect(PIANO_ROLL_NOTES[83].note).toBe('c1')
   })
 
   it('marks sharp/flat notes as black keys', () => {
@@ -306,8 +327,8 @@ describe('PIANO_ROLL_NOTES', () => {
     }
   })
 
-  it('has exactly 15 black key notes (5 per octave × 3 octaves)', () => {
-    expect(PIANO_ROLL_NOTES.filter(n => n.isBlack)).toHaveLength(15)
+  it('has exactly 35 black key notes (5 per octave × 7 octaves)', () => {
+    expect(PIANO_ROLL_NOTES.filter(n => n.isBlack)).toHaveLength(35)
   })
 })
 
@@ -346,11 +367,15 @@ describe('createSynthTrack', () => {
     expect(createSynthTrack('supersaw').muted).toBe(false)
   })
 
-  it('creates 5 default effects', () => {
-    expect(createSynthTrack('supersaw').effects).toHaveLength(5)
+  it('creates 14 default effects', () => {
+    expect(createSynthTrack('supersaw').effects).toHaveLength(14)
   })
 
   it('generates a unique UUID id each call', () => {
     expect(createSynthTrack('supersaw').id).not.toBe(createSynthTrack('supersaw').id)
+  })
+
+  it('has default octave of 3', () => {
+    expect(createSynthTrack('supersaw').octave).toBe(3)
   })
 })

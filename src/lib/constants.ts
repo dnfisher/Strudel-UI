@@ -29,11 +29,20 @@ export const TRACK_COLORS = [
 
 export function createDefaultEffects(): Effect[] {
   return [
-    { name: 'Low Pass', param: 'lpf', value: 20000, min: 100, max: 20000, step: 100, enabled: false },
-    { name: 'Reverb', param: 'room', value: 0, min: 0, max: 1, step: 0.05, enabled: false },
-    { name: 'Delay', param: 'delay', value: 0, min: 0, max: 1, step: 0.05, enabled: false },
-    { name: 'Distortion', param: 'distort', value: 0, min: 0, max: 5, step: 0.1, enabled: false },
-    { name: 'Pan', param: 'pan', value: 0.5, min: 0, max: 1, step: 0.05, enabled: false },
+    { name: 'Low Pass',       param: 'lpf',          value: 20000, min: 100,  max: 20000, step: 100,  enabled: false },
+    { name: 'Reverb',         param: 'room',          value: 0,     min: 0,    max: 1,     step: 0.05, enabled: false },
+    { name: 'Delay',          param: 'delay',         value: 0,     min: 0,    max: 1,     step: 0.05, enabled: false },
+    { name: 'Distortion',     param: 'distort',       value: 0,     min: 0,    max: 5,     step: 0.1,  enabled: false },
+    { name: 'Pan',            param: 'pan',           value: 0.5,   min: 0,    max: 1,     step: 0.05, enabled: false },
+    { name: 'Resonance',      param: 'lpq',           value: 0,     min: 0,    max: 50,    step: 1,    enabled: false },
+    { name: 'High Pass',      param: 'hpf',           value: 0,     min: 0,    max: 20000, step: 100,  enabled: false },
+    { name: 'HP Resonance',   param: 'hpq',           value: 0,     min: 0,    max: 10,    step: 0.1,  enabled: false },
+    { name: 'Delay Time',     param: 'delaytime',     value: 0.25,  min: 0,    max: 1,     step: 0.05, enabled: false },
+    { name: 'Delay Feedback', param: 'delayfeedback', value: 0,     min: 0,    max: 1,     step: 0.05, enabled: false },
+    { name: 'Bitcrusher',     param: 'crush',         value: 8,     min: 2,    max: 16,    step: 1,    enabled: false },
+    { name: 'Attack',         param: 'attack',        value: 0,     min: 0,    max: 2,     step: 0.05, enabled: false },
+    { name: 'Release',        param: 'release',       value: 0,     min: 0,    max: 4,     step: 0.1,  enabled: false },
+    { name: 'Speed',          param: 'speed',         value: 1,     min: 0.25, max: 4,     step: 0.05, enabled: false },
   ];
 }
 
@@ -66,11 +75,23 @@ export const SYNTH_SOUNDS = [
   { id: 'triangle', label: 'Triangle' },
 ] as const;
 
+export const SAMPLE_PACK_SOUNDS = [
+  { id: 'ctvox',      label: 'Vox'           },
+  { id: 'swpad',      label: 'SW Pad'        },
+  { id: 'breaks',     label: 'Break'         },
+  { id: 'crate_bd',   label: 'Crate Kick'    },
+  { id: 'crate_sd',   label: 'Crate Snare'   },
+  { id: 'crate_hh',   label: 'Crate Hat'     },
+  { id: 'crate_oh',   label: 'Crate Open Hat'},
+  { id: 'crate_cp',   label: 'Crate Clap'    },
+  { id: 'crate_perc', label: 'Crate Perc'    },
+] as const;
+
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
 const BLACK_KEY_NAMES = new Set(['C#', 'D#', 'F#', 'G#', 'A#']);
 
 export const PIANO_ROLL_NOTES: Array<{ note: string; label: string; isBlack: boolean }> = [];
-for (let octave = 4; octave >= 2; octave--) {
+for (let octave = 7; octave >= 1; octave--) {
   for (let i = 11; i >= 0; i--) {
     const name = NOTE_NAMES[i];
     const isBlack = BLACK_KEY_NAMES.has(name);
@@ -92,6 +113,7 @@ export function createSynthTrack(synth: string): Track {
     color: getNextColor(),
     type: 'synth',
     synth,
+    octave: 3,
   };
 }
 

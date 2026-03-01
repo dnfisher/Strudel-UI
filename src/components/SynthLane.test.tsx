@@ -45,12 +45,12 @@ describe('SynthLane', () => {
     expect(screen.getByText('TRI')).toBeInTheDocument()
   })
 
-  it('renders 576 piano roll cells (36 notes × 16 steps)', () => {
+  it('renders 1344 piano roll cells (84 notes × 16 steps)', () => {
     const track = createSynthTrack('supersaw')
     useStore.setState({ tracks: [track] })
     render(<SynthLane track={track} isSelected={false} />)
     const cells = screen.getAllByTestId(/^synth-cell-/)
-    expect(cells).toHaveLength(576)
+    expect(cells).toHaveLength(1344)
   })
 
   it('clicking a cell toggles the note in the store', async () => {
