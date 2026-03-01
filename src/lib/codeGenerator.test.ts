@@ -37,6 +37,32 @@ function withActiveSteps(track: Track, indices: number[]): Track {
   }
 }
 
+function makeSynthTrack(overrides: Partial<Track> = {}): Track {
+  return {
+    id: 'synth-1',
+    sound: 'supersaw',
+    label: 'SUPERSAW',
+    steps: Array.from({ length: 16 }, () => ({ active: false, notes: [] })),
+    effects: [],
+    muted: false,
+    volume: 1,
+    color: '#a855f7',
+    type: 'synth',
+    synth: 'supersaw',
+    ...overrides,
+  }
+}
+
+function withSynthNotes(track: Track, notesByStep: Record<number, string[]>): Track {
+  return {
+    ...track,
+    steps: track.steps.map((s, i) => {
+      const notes = notesByStep[i] ?? []
+      return { active: notes.length > 0, notes }
+    }),
+  }
+}
+
 describe('generateDisplayCode', () => {
   it('returns placeholder when there are no tracks', () => {
     expect(generateDisplayCode([], 120)).toBe('// No active tracks')
@@ -195,5 +221,76 @@ describe('generatePlayableCode', () => {
       effects: [makeEffect({ param: 'room', value: 0.5, enabled: false })],
     })
     expect(generatePlayableCode([t], 120)).not.toContain('.room(')
+  })
+})
+
+describe('generateDisplayCode — synth tracks', () => {
+  it('uses note() instead of s() for synth tracks', () => {
+    const t = withSynthNotes(makeSynthTrack(), { 0: ['c3'] })
+    const code = generateDisplayCode([t], 120)
+    expect(code).toContain('note(')
+    expect(code).not.toContain('s("c3")')
+  })
+
+  it('generates rests (~) for empty steps', () => {
+    const t = withSynthNotes(makeSynthTrack(), { 0: ['c3'] })
+    const code = generateDisplayCode([t], 120)
+    expect(code).toContain('c3 ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~')
+  })
+
+  it('wraps multiple notes at one step in chord notation', () => {
+    const t = withSynthNotes(makeSynthTrack(), { 0: ['c3', 'e3', 'g3'] })
+    const code = generateDisplayCode([t], 120)
+    expect(code).toContain('[c3,e3,g3]')
+  })
+
+  it('appends .s() with the synth type', () => {
+    const t = withSynthNotes(makeSynthTrack({ synth: 'sine' }), { 0: ['c2'] })
+    const code = generateDisplayCode([t], 120)
+    expect(code).toContain('.s("sine")')
+  })
+
+  it('does not add .gain() when volume is exactly 1', () => {
+    const t = withSynthNotes(makeSynthTrack({ volume: 1 }), { 0: ['c3'] })
+    expect(generateDisplayCode([t], 120)).not.toContain('.gain(')
+  })
+
+  it('adds .gain() when volume is not 1', () => {
+    const t = withSynthNotes(makeSynthTrack({ volume: 0.7 }), { 0: ['c3'] })
+    expect(generateDisplayCode([t], 120)).toContain('.gain(0.70)')
+  })
+
+  it('appends enabled effects', () => {
+    const t = withSynthNotes(
+      makeSynthTrack({ effects: [makeEffect({ param: 'room', value: 0.4, enabled: true })] }),
+      { 0: ['c3'] }
+    )
+    expect(generateDisplayCode([t], 120)).toContain('.room(0.4)')
+  })
+
+  it('mixes drum and synth tracks in a stack', () => {
+    const drum = withActiveSteps(makeTrack({ id: 'a' }), [0])
+    const synth = withSynthNotes(makeSynthTrack({ id: 'b' }), { 0: ['c3'] })
+    const code = generateDisplayCode([drum, synth], 120)
+    expect(code).toContain('stack(')
+    expect(code).toContain('s("bd')
+    expect(code).toContain('note(')
+  })
+})
+
+describe('generatePlayableCode — synth tracks', () => {
+  it('uses note() for synth tracks', () => {
+    const t = withSynthNotes(makeSynthTrack(), { 0: ['c3'] })
+    expect(generatePlayableCode([t], 120)).toContain('note(')
+  })
+
+  it('produces compact single-line output', () => {
+    const t = withSynthNotes(makeSynthTrack(), { 0: ['c3'] })
+    expect(generatePlayableCode([t], 120)).not.toContain('\n')
+  })
+
+  it('appends .s() with synth type', () => {
+    const t = withSynthNotes(makeSynthTrack({ synth: 'square' }), { 0: ['a3'] })
+    expect(generatePlayableCode([t], 120)).toContain('.s("square")')
   })
 })

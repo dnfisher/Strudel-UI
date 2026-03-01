@@ -1,6 +1,33 @@
 import type { Track } from '../store/types';
 
+function generateSynthTrackCode(track: Track): string {
+  const steps = track.steps.map(step => {
+    const notes = step.notes ?? [];
+    if (notes.length === 0) return '~';
+    if (notes.length === 1) return notes[0];
+    return `[${notes.join(',')}]`;
+  });
+
+  let code = `note("${steps.join(' ')}").s("${track.synth ?? 'supersaw'}")`;
+
+  if (track.volume !== 1) {
+    code += `.gain(${track.volume.toFixed(2)})`;
+  }
+
+  for (const effect of track.effects) {
+    if (effect.enabled) {
+      code += `.${effect.param}(${effect.value})`;
+    }
+  }
+
+  return code;
+}
+
 function generateTrackCode(track: Track): string {
+  if (track.type === 'synth') {
+    return generateSynthTrackCode(track);
+  }
+
   const steps = track.steps.map(step => step.active ? track.sound : '~');
   let code = `s("${steps.join(' ')}")`;
 
