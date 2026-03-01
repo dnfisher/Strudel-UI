@@ -3,10 +3,11 @@ interface StepCellProps {
   color: string;
   beat: number;
   muted: boolean;
+  isPlayhead?: boolean;
   onClick: () => void;
 }
 
-export function StepCell({ active, color, beat, muted, onClick }: StepCellProps) {
+export function StepCell({ active, color, beat, muted, isPlayhead, onClick }: StepCellProps) {
   const isDownbeat = beat % 4 === 0;
 
   return (
@@ -26,7 +27,10 @@ export function StepCell({ active, color, beat, muted, onClick }: StepCellProps)
       style={active ? {
         backgroundColor: color,
         boxShadow: `0 0 10px ${color}30`,
-      } : undefined}
+        borderTop: isPlayhead ? '2px solid white' : undefined,
+      } : {
+        borderTop: isPlayhead ? '2px solid white' : undefined,
+      }}
       aria-label={`Step ${beat + 1} ${active ? 'on' : 'off'}`}
     />
   );

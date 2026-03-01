@@ -26,47 +26,47 @@ beforeEach(() => {
 
 describe('TrackLane', () => {
   it('renders the track label', () => {
-    render(<TrackLane track={makeTrack({ label: 'Kick' })} isSelected={false} />)
+    render(<TrackLane track={makeTrack({ label: 'Kick' })} isSelected={false} activeStep={null} />)
     // CSS applies text-transform:uppercase visually; DOM text remains as-is
     expect(screen.getByText('Kick')).toBeInTheDocument()
   })
 
   it('renders 16 step cells', () => {
-    render(<TrackLane track={makeTrack()} isSelected={false} />)
+    render(<TrackLane track={makeTrack()} isSelected={false} activeStep={null} />)
     // Steps have aria-label "Step N on/off"
     expect(screen.getAllByRole('button', { name: /^Step \d+ (on|off)$/ })).toHaveLength(16)
   })
 
   it('renders a Mute button', () => {
-    render(<TrackLane track={makeTrack()} isSelected={false} />)
+    render(<TrackLane track={makeTrack()} isSelected={false} activeStep={null} />)
     expect(screen.getByTitle('Mute')).toBeInTheDocument()
   })
 
   it('renders Unmute title when track is muted', () => {
-    render(<TrackLane track={makeTrack({ muted: true })} isSelected={false} />)
+    render(<TrackLane track={makeTrack({ muted: true })} isSelected={false} activeStep={null} />)
     expect(screen.getByTitle('Unmute')).toBeInTheDocument()
   })
 
   it('renders a volume slider', () => {
-    render(<TrackLane track={makeTrack({ volume: 0.8 })} isSelected={false} />)
+    render(<TrackLane track={makeTrack({ volume: 0.8 })} isSelected={false} activeStep={null} />)
     const slider = screen.getByTitle(/Volume/)
     expect(slider).toBeInTheDocument()
     expect(slider).toHaveAttribute('value', '0.8')
   })
 
   it('renders a delete button', () => {
-    render(<TrackLane track={makeTrack()} isSelected={false} />)
+    render(<TrackLane track={makeTrack()} isSelected={false} activeStep={null} />)
     expect(screen.getByTitle('Remove track')).toBeInTheDocument()
   })
 
   it('applies selected styles when isSelected is true', () => {
-    const { container } = render(<TrackLane track={makeTrack()} isSelected={true} />)
+    const { container } = render(<TrackLane track={makeTrack()} isSelected={true} activeStep={null} />)
     // The outer div should have ring styling
     expect(container.firstChild).toHaveClass('ring-1')
   })
 
   it('does not apply selected styles when isSelected is false', () => {
-    const { container } = render(<TrackLane track={makeTrack()} isSelected={false} />)
+    const { container } = render(<TrackLane track={makeTrack()} isSelected={false} activeStep={null} />)
     expect(container.firstChild).not.toHaveClass('ring-1')
   })
 
@@ -76,7 +76,7 @@ describe('TrackLane', () => {
     // Put the track in the store so selectTrack can work
     useStore.setState({ tracks: [track] })
 
-    render(<TrackLane track={track} isSelected={false} />)
+    render(<TrackLane track={track} isSelected={false} activeStep={null} />)
     // Click the label area (CSS uppercase is visual only; DOM text is original case)
     await user.click(screen.getByText('Kick'))
     expect(useStore.getState().selectedTrackId).toBe('track-1')
@@ -87,7 +87,7 @@ describe('TrackLane', () => {
     const track = makeTrack({ id: 'track-1' })
     useStore.setState({ tracks: [track] })
 
-    render(<TrackLane track={track} isSelected={false} />)
+    render(<TrackLane track={track} isSelected={false} activeStep={null} />)
     await user.click(screen.getByTitle('Mute'))
 
     expect(useStore.getState().tracks[0].muted).toBe(true)
@@ -100,7 +100,7 @@ describe('TrackLane', () => {
     const track = makeTrack({ id: 'track-1' })
     useStore.setState({ tracks: [track] })
 
-    render(<TrackLane track={track} isSelected={false} />)
+    render(<TrackLane track={track} isSelected={false} activeStep={null} />)
     await user.click(screen.getByTitle('Remove track'))
 
     expect(useStore.getState().tracks).toHaveLength(0)
@@ -111,7 +111,7 @@ describe('TrackLane', () => {
     const track = makeTrack({ id: 'track-1' })
     useStore.setState({ tracks: [track] })
 
-    render(<TrackLane track={track} isSelected={false} />)
+    render(<TrackLane track={track} isSelected={false} activeStep={null} />)
     // Click step 1 (beat 0)
     await user.click(screen.getByLabelText('Step 1 off'))
 
@@ -119,10 +119,41 @@ describe('TrackLane', () => {
   })
 
   it('step cells are grouped into 4 beat groups of 4', () => {
-    const { container } = render(<TrackLane track={makeTrack()} isSelected={false} />)
+    const { container } = render(<TrackLane track={makeTrack()} isSelected={false} activeStep={null} />)
     // The step grid wrapper has 4 beat groups each containing 4 cells
     // We check there are 16 step buttons total
     const stepButtons = screen.getAllByRole('button', { name: /^Step/ })
     expect(stepButtons).toHaveLength(16)
+  })
+})
+
+describe('collapse', () => {
+  it('renders a collapse toggle button', () => {
+    render(<TrackLane track={makeTrack()} isSelected={false} activeStep={null} />)
+    expect(screen.getByTitle('Collapse')).toBeInTheDocument()
+  })
+
+  it('clicking collapse toggle calls toggleCollapse in the store', async () => {
+    const user = userEvent.setup()
+    const track = makeTrack({ id: 'track-1' })
+    useStore.setState({ tracks: [track] })
+    render(<TrackLane track={track} isSelected={false} activeStep={null} />)
+    await user.click(screen.getByTitle('Collapse'))
+    expect(useStore.getState().tracks[0].collapsed).toBe(true)
+  })
+
+  it('hides step grid when collapsed', () => {
+    render(<TrackLane track={makeTrack({ collapsed: true })} isSelected={false} activeStep={null} />)
+    expect(screen.queryAllByRole('button', { name: /^Step/ })).toHaveLength(0)
+  })
+
+  it('shows mini strip when collapsed', () => {
+    render(<TrackLane track={makeTrack({ collapsed: true })} isSelected={false} activeStep={null} />)
+    expect(screen.getByTestId('mini-strip')).toBeInTheDocument()
+  })
+
+  it('does not show mini strip when expanded', () => {
+    render(<TrackLane track={makeTrack({ collapsed: false })} isSelected={false} activeStep={null} />)
+    expect(screen.queryByTestId('mini-strip')).not.toBeInTheDocument()
   })
 })
