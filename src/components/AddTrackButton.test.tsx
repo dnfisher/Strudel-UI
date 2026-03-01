@@ -105,6 +105,31 @@ describe('AddTrackButton', () => {
     expect(screen.queryByText('Sine')).not.toBeInTheDocument()
   })
 
+  it('shows Classic section header inside Drum submenu', async () => {
+    const user = userEvent.setup()
+    render(<AddTrackButton />)
+    await user.click(screen.getByText('+ Add Track'))
+    await user.click(screen.getByText('Drum'))
+    expect(screen.getByText('Classic')).toBeInTheDocument()
+  })
+
+  it('shows Sample Packs section header inside Drum submenu', async () => {
+    const user = userEvent.setup()
+    render(<AddTrackButton />)
+    await user.click(screen.getByText('+ Add Track'))
+    await user.click(screen.getByText('Drum'))
+    expect(screen.getByText('Sample Packs')).toBeInTheDocument()
+  })
+
+  it('adds a ctvox drum track when Vox is selected', async () => {
+    const user = userEvent.setup()
+    render(<AddTrackButton />)
+    await user.click(screen.getByText('+ Add Track'))
+    await user.click(screen.getByText('Drum'))
+    await user.click(screen.getByText('Vox'))
+    expect(useStore.getState().tracks[0].sound).toBe('ctvox')
+  })
+
   it('closes dropdown when clicking outside', async () => {
     const user = userEvent.setup()
     render(

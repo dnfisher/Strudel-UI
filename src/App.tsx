@@ -1,5 +1,6 @@
 import { useStore } from './store/useStore';
 import { generateDisplayCode } from './lib/codeGenerator';
+import { usePlayhead } from './lib/usePlayhead';
 import { Header } from './components/Header';
 import { TrackLane } from './components/TrackLane';
 import { SynthLane } from './components/SynthLane';
@@ -21,7 +22,9 @@ const PRESETS = [
 function App() {
   const tracks = useStore(s => s.tracks);
   const selectedTrackId = useStore(s => s.selectedTrackId);
+  const isPlaying = useStore(s => s.isPlaying);
   const bpm = useStore(s => s.bpm);
+  const activeStep = usePlayhead(isPlaying, bpm);
   const toggleEffect            = useStore(s => s.toggleEffect);
   const setEffectValue          = useStore(s => s.setEffectValue);
   const setEffectPattern        = useStore(s => s.setEffectPattern);
@@ -55,8 +58,8 @@ function App() {
           <div className="flex flex-col gap-1">
             {tracks.map(track => (
               track.type === 'synth'
-                ? <SynthLane key={track.id} track={track} isSelected={track.id === selectedTrackId} />
-                : <TrackLane key={track.id} track={track} isSelected={track.id === selectedTrackId} />
+                ? <SynthLane key={track.id} track={track} isSelected={track.id === selectedTrackId} activeStep={activeStep} />
+                : <TrackLane key={track.id} track={track} isSelected={track.id === selectedTrackId} activeStep={activeStep} />
             ))}
           </div>
 
