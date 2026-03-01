@@ -8,10 +8,16 @@ export async function ensureInit(): Promise<void> {
   if (!initPromise) {
     initPromise = initStrudel({
       prebake: () => {
-        // Load the standard Tidal Cycles sample library
         const w = window as unknown as Record<string, unknown>;
         if (typeof w.samples === 'function') {
-          return (w.samples as (url: string) => Promise<void>)('github:tidalcycles/dirt-samples');
+          const s = w.samples as (url: string) => Promise<void>;
+          return Promise.all([
+            s('github:tidalcycles/dirt-samples'),
+            s('github:switchangel/beginningtrance'),
+            s('github:switchangel/pad'),
+            s('github:switchangel/breaks'),
+            s('github:eddyflux/crate'),
+          ]).then(() => undefined);
         }
       },
     }).then(() => {
