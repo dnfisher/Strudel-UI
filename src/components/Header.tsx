@@ -20,6 +20,7 @@ export function Header() {
     } else {
       const code = generatePlayableCode(tracks, bpm);
       if (code) {
+        prevStateRef.current = code; // Prevent re-evaluate effect from double-firing
         await playCode(code);
         setPlaying(true);
       }

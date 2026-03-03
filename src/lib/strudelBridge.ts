@@ -2,6 +2,7 @@ import { initStrudel } from '@strudel/web';
 
 let initialized = false;
 let initPromise: Promise<void> | null = null;
+let currentPlayId = 0;
 
 export async function ensureInit(): Promise<void> {
   if (initialized) return;
@@ -28,12 +29,15 @@ export async function ensureInit(): Promise<void> {
 }
 
 export async function playCode(code: string): Promise<void> {
+  const myPlayId = ++currentPlayId;
   await ensureInit();
   try {
     const w = window as unknown as Record<string, unknown>;
     if (typeof w.hush === 'function') {
       (w.hush as () => void)();
     }
+    // Bail out if stop() was called while we were awaiting init
+    if (myPlayId !== currentPlayId) return;
     if (typeof w.evaluate === 'function') {
       await (w.evaluate as (code: string) => Promise<void>)(code);
     }
@@ -43,6 +47,7 @@ export async function playCode(code: string): Promise<void> {
 }
 
 export async function stop(): Promise<void> {
+  currentPlayId++; // Invalidate any in-flight playCode calls
   if (!initialized) return;
   try {
     const w = window as unknown as Record<string, unknown>;
